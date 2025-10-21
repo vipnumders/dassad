@@ -1125,3 +1125,28 @@ body {
                 max-width: 100%;
             }
         }
+
+/* Force desktop layout on all devices */
+html, body {
+  width: 100%;
+  min-width: 1200px;  /* same as your desktop container */
+  overflow-x: auto !important;
+}
+
+@media (max-width: 1200px) {
+  body {
+    transform: scale(1);
+    transform-origin: top left;
+  }
+
+  /* Prevent any responsive overrides */
+  .container,
+  .enhanced-search-container,
+  .filters-grid,
+  .vip-card {
+    width: 1200px !important;
+    max-width: 1200px !important;
+  }
+}
+
+
