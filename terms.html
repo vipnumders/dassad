@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Golden Vip Numbers</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000000;
+            color: #ffffff;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            backdrop-filter: blur(15px);
+            border-bottom: 2px solid rgba(255, 215, 0, 0.4);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .navbar .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #FFD700;
+            font-size: 1.8em;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .navbar .logo .logo-icon {
+            font-size: 2em;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .navbar .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .navbar .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .navbar .nav-links a:hover::before,
+        .navbar .nav-links a.active::before {
+            left: 100%;
+        }
+
+        .navbar .nav-links a:hover,
+        .navbar .nav-links a.active {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000000;
+            border-color: #FFD700;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+        }
+
+        .navbar .back-home {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            border: 2px solid #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .navbar .back-home:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.5);
+            background: linear-gradient(135deg, #45a049, #4CAF50);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 40px 0;
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .page-title p {
+            color: #cccccc;
+            font-size: 1.1em;
+        }
+
+        /* Policy Sections */
+        .policy-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .policy-section h2 {
+            color: #FFD700;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .policy-section h3 {
+            color: #4CAF50;
+            font-size: 1.3em;
+            margin: 25px 0 15px 0;
+        }
+
+        .policy-section p,
+        .policy-section li {
+            color: #e0e0e0;
+            margin-bottom: 15px;
+            line-height: 1.7;
+        }
+
+        .policy-section ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        .policy-section li {
+            margin-bottom: 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar .container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .navbar .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
+            }
+
+            .policy-section {
+                padding: 20px;
+            }
+
+            .page-title h1 {
+                font-size: 2em;
+            }
+        }
+
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Highlight active section */
+        .policy-section:target {
+            animation: highlight 2s ease;
+        }
+
+        @keyframes highlight {
+            0% { background: rgba(255, 215, 0, 0.1); }
+            100% { background: rgba(255, 255, 255, 0.05); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">⚡</span>
+                Golden Vip Numbers
+            </a>
+            <div class="nav-links">
+             
+                <a href="index.html" class="back-home">Back to Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <div class="page-title">
+            <h1>Terms & Policies</h1>
+            <p>Please read our terms and policies carefully before using our services</p>
+        </div>
+
+        <!-- Terms and Conditions -->
+        <section id="terms" class="policy-section">
+            <h2>Terms and Conditions</h2>
+
+            <h3>1. Acceptance of Terms</h3>
+            <p>By accessing and using Golden Vip Numbers website, you accept and agree to be bound by the terms and provision of this agreement.</p>
+
+            <h3>2. Use License</h3>
+            <p>Permission is granted to temporarily access the materials (information or software) on Golden Vip Numbers website for personal, non-commercial transitory viewing only.</p>
+
+            <h3>3. Number Purchase Terms</h3>
+            <p>All VIP number purchases are final. Once a number is purchased and activated, it cannot be returned or refunded unless there's a technical issue from our side.</p>
+
+            <h3>4. Payment Terms</h3>
+            <p>All payments must be made through our secure payment gateway. We accept various payment methods including credit cards, debit cards, and online banking.</p>
+
+            <h3>5. Delivery Terms</h3>
+            <p>VIP numbers are typically delivered within 24-48 hours after successful payment verification. Delivery time may vary based on the telecom operator.</p>
+
+            <h3>6. Limitation of Liability</h3>
+            <p>In no event shall Golden Vip Numbers or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on Golden Vip Numbers website.</p>
+
+            <h3>7. Privacy Policy</h3>
+            <p>Your privacy is important to us. Please review our Privacy Policy, which also governs your use of Golden Vip Numbers website, to understand our practices.</p>
+
+            <h3>8. Governing Law</h3>
+            <p>These terms and conditions are governed by and construed in accordance with the laws of India, and you irrevocably submit to the exclusive jurisdiction of the courts in that state or location.</p>
+        </section>
+
+        <!-- Privacy Policy -->
+        <section id="privacy" class="policy-section">
+            <h2>Privacy Policy</h2>
+
+            <h3>1. Information We Collect</h3>
+            <p>We collect information you provide directly to us, such as when you create an account, make a purchase, or contact us for support.</p>
+
+            <h3>2. How We Use Your Information</h3>
+            <p>We use the information we collect to provide, maintain, and improve our services, process transactions, and communicate with you.</p>
+
+            <h3>3. Information Sharing</h3>
+            <p>We do not sell, trade, or otherwise transfer your personal information to third parties without your consent, except as described in this policy.</p>
+
+            <h3>4. Data Security</h3>
+            <p>We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.</p>
+
+            <h3>5. Cookies</h3>
+            <p>We use cookies and similar technologies to enhance your experience on our website and to analyze website traffic.</p>
+
+            <h3>6. Your Rights</h3>
+            <p>You have the right to access, update, or delete your personal information. You can also opt out of certain communications.</p>
+
+            <h3>7. Changes to This Policy</h3>
+            <p>We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page.</p>
+
+            <h3>8. Contact Us</h3>
+            <p>If you have any questions about this privacy policy, please contact us through our website or customer support channels.</p>
+        </section>
+
+        <!-- Refund Policy -->
+        <section id="refund" class="policy-section">
+            <h2>Refund Policy</h2>
+
+            <h3>1. Refund Eligibility</h3>
+            <p>Refunds are available only in cases of technical issues or if the VIP number cannot be delivered due to reasons beyond the customer's control.</p>
+
+            <h3>2. Non-Refundable Items</h3>
+            <p>Once a VIP number has been successfully delivered and activated on your telecom connection, it becomes non-refundable.</p>
+
+            <h3>3. Refund Process</h3>
+            <p>If you are eligible for a refund, please contact our customer support within 7 days of purchase with relevant details and proof of the issue.</p>
+
+            <h3>4. Refund Timeframe</h3>
+            <p>Approved refunds will be processed within 7-14 business days and credited back to the original payment method.</p>
+
+            <h3>5. Cancellation Policy</h3>
+            <p>You can cancel your order within 1 hour of purchase if the number hasn't been processed yet. After that, cancellation may not be possible.</p>
+
+            <h3>6. Technical Issues</h3>
+            <p>If you experience technical issues with the purchased number, please contact us immediately. We'll work to resolve the issue or provide a suitable replacement.</p>
+
+            <h3>7. Contact for Refunds</h3>
+            <p>For refund requests, please reach out to our customer support team through WhatsApp or email with your order details.</p>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer style="
+        background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+        border-top: 2px solid rgba(255, 215, 0, 0.3);
+        padding: 40px 20px;
+        margin-top: 60px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+    ">
+        <div style="
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        ">
+            <!-- Logo and Brand -->
+            <div style="
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            ">
+                <span style="
+                    font-size: 2em;
+                    color: #FFD700;
+                    text-shadow: 0 2px 10px rgba(255, 215, 0, 0.5);
+                    animation: pulse 2s infinite;
+                ">⚡</span>
+                <span style="
+                    font-size: 1.5em;
+                    font-weight: 700;
+                    background: linear-gradient(135deg, #FFD700, #FFA500);
+                    -webkit-background-clip: text;
+                    background-clip: text;
+                    color: transparent;
+                ">Golden Vip Numbers</span>
+            </div>
+
+            <!-- Copyright Text -->
+            <p style="
+                color: #cccccc;
+                font-size: 1em;
+                margin: 0;
+                font-weight: 400;
+            ">&copy; Golden Vip Numbers. All rights reserved.</p>
+
+            <!-- Additional Links -->
+            <div style="
+                margin-top: 20px;
+                display: flex;
+                justify-content: center;
+                gap: 30px;
+                flex-wrap: wrap;
+            ">
+                <a href="#terms" style="
+                    color: #FFD700;
+                    text-decoration: none;
+                    font-weight: 500;
+                    transition: all 0.3s ease;
+                    padding: 5px 10px;
+                    border-radius: 5px;
+                " onmouseover="this.style.background='rgba(255, 215, 0, 0.1)'" onmouseout="this.style.background='transparent'">Terms & Conditions</a>
+                <a href="#privacy" style="
+                    color: #FFD700;
+                    text-decoration: none;
+                    font-weight: 500;
+                    transition: all 0.3s ease;
+                    padding: 5px 10px;
+                    border-radius: 5px;
+                " onmouseover="this.style.background='rgba(255, 215, 0, 0.1)'" onmouseout="this.style.background='transparent'">Privacy Policy</a>
+                <a href="#refund" style="
+                    color: #FFD700;
+                    text-decoration: none;
+                    font-weight: 500;
+                    transition: all 0.3s ease;
+                    padding: 5px 10px;
+                    border-radius: 5px;
+                " onmouseover="this.style.background='rgba(255, 215, 0, 0.1)'" onmouseout="this.style.background='transparent'">Refund Policy</a>
+                <a href="index.html" style="
+                    color: #4CAF50;
+                    text-decoration: none;
+                    font-weight: 500;
+                    transition: all 0.3s ease;
+                    padding: 5px 10px;
+                    border-radius: 5px;
+                " onmouseover="this.style.background='rgba(76, 175, 80, 0.1)'" onmouseout="this.style.background='transparent'">Back to Home</a>
+            </div>
+        </div>
+
+        <!-- Decorative Element -->
+        <div style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.5), transparent);
+        "></div>
+    </footer>
+</body>
+</html>

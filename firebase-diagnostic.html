@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Diagnostic Tool - Global VIP Numbers</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4CAF50;
+        }
+        .diagnostic-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .success { background: rgba(76, 175, 80, 0.2); color: #4CAF50; border: 1px solid #4CAF50; }
+        .error { background: rgba(244, 67, 54, 0.2); color: #f44336; border: 1px solid #f44336; }
+        .warning { background: rgba(255, 152, 0, 0.2); color: #FF9800; border: 1px solid #FF9800; }
+        .info { background: rgba(33, 150, 243, 0.2); color: #2196F3; border: 1px solid #2196F3; }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: #3367D6;
+            transform: translateY(-2px);
+        }
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 10px 0;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            border-left: 4px solid #4CAF50;
+        }
+        .critical {
+            border-left: 4px solid #f44336;
+            background: rgba(244, 67, 54, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Firebase Diagnostic Tool</h1>
+        
+        <div class="diagnostic-section">
+            <h3>🚨 Quick Fix Steps</h3>
+            <div class="step critical">
+                <strong>STEP 1 (CRITICAL):</strong> Go to <a href="https://console.firebase.google.com/" target="_blank" style="color: #4CAF50;">Firebase Console</a> → Authentication → Sign-in method → Enable "Email/Password"
+            </div>
+            <div class="step">
+                <strong>STEP 2:</strong> Add "localhost" to authorized domains in Firebase Console → Authentication → Settings
+            </div>
+            <div class="step">
+                <strong>STEP 3:</strong> Run the diagnostic tests below to identify issues
+            </div>
+        </div>
+        
+        <div class="diagnostic-section">
+            <h3>📋 Firebase Configuration Check</h3>
+            <div id="configStatus" class="status info">Checking configuration...</div>
+            <div id="configDetails" class="code-block" style="display: none;"></div>
+        </div>
+        
+        <div class="diagnostic-section">
+            <h3>🔐 Authentication Provider Check</h3>
+            <button id="checkProviders">Check Authentication Providers</button>
+            <div id="providerStatus" class="status"></div>
+        </div>
+        
+        <div class="diagnostic-section">
+            <h3>🌐 Network & Domain Check</h3>
+            <button id="checkNetwork">Check Network & Domains</button>
+            <div id="networkStatus" class="status"></div>
+        </div>
+        
+        <div class="diagnostic-section">
+            <h3>🧪 Live Authentication Test</h3>
+            <button id="testAuth">Test Email Authentication</button>
+            <div id="authTestStatus" class="status"></div>
+        </div>
+        
+        <div class="diagnostic-section">
+            <h3>🔍 Browser Console Check</h3>
+            <button id="checkConsole">Check for Console Errors</button>
+            <div id="consoleStatus" class="status"></div>
+        </div>
+        
+        <div class="diagnostic-section">
+            <h3>📊 Diagnostic Results</h3>
+            <div id="diagnosticResults" class="status info">Ready to run diagnostics...</div>
+        </div>
+        
+        <div class="diagnostic-section">
+            <h3>🔗 Quick Links</h3>
+            <button onclick="window.open('https://console.firebase.google.com/', '_blank')">🔥 Firebase Console</button>
+            <button onclick="window.open('index.html', '_blank')">🏠 Main App</button>
+            <button onclick="window.open('test-email-auth.html', '_blank')">🧪 Test Page</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAgVrQTPsIocnQEUioIEKZgcwMXG1t1tHk",
+            authDomain: "gobal-vip-numbers.firebaseapp.com",
+            projectId: "gobal-vip-numbers",
+            storageBucket: "gobal-vip-numbers.appspot.com",
+            messagingSenderId: "1059192210451",
+            appId: "1:1059192210451:web:21551ac29b84619b0fabe6",
+            measurementId: "G-FMF9QNVQW0"
+        };
+
+        // Initialize Firebase
+        let app, auth;
+        
+        // DOM elements
+        const configStatus = document.getElementById('configStatus');
+        const configDetails = document.getElementById('configDetails');
+        const providerStatus = document.getElementById('providerStatus');
+        const networkStatus = document.getElementById('networkStatus');
+        const authTestStatus = document.getElementById('authTestStatus');
+        const consoleStatus = document.getElementById('consoleStatus');
+        const diagnosticResults = document.getElementById('diagnosticResults');
+
+        // Check Firebase configuration
+        function checkFirebaseConfig() {
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                
+                configStatus.innerHTML = '✅ Firebase configuration loaded successfully';
+                configStatus.className = 'status success';
+                
+                configDetails.innerHTML = `Project ID: ${firebaseConfig.projectId}
+Auth Domain: ${firebaseConfig.authDomain}
+API Key: ${firebaseConfig.apiKey.substring(0, 20)}...
+Current Domain: ${window.location.hostname}
+Current Origin: ${window.location.origin}`;
+                configDetails.style.display = 'block';
+                
+                updateDiagnosticResults('✅ Firebase Configuration: OK');
+                return true;
+            } catch (error) {
+                configStatus.innerHTML = '❌ Firebase configuration error: ' + error.message;
+                configStatus.className = 'status error';
+                updateDiagnosticResults('❌ Firebase Configuration: FAILED');
+                return false;
+            }
+        }
+
+        // Check authentication providers
+        async function checkAuthenticationProviders() {
+            providerStatus.innerHTML = '🔄 Checking authentication providers...';
+            providerStatus.className = 'status info';
+            
+            try {
+                // Try to create a test user to check if email/password is enabled
+                const testEmail = `diagnostic-test-${Date.now()}@example.com`;
+                const testPassword = 'testpassword123';
+                
+                const userCredential = await createUserWithEmailAndPassword(auth, testEmail, testPassword);
+                
+                providerStatus.innerHTML = '✅ Email/Password authentication is ENABLED and working!';
+                providerStatus.className = 'status success';
+                updateDiagnosticResults('✅ Email/Password Provider: ENABLED');
+                
+                // Clean up test user
+                console.log('Test user created successfully:', userCredential.user.uid);
+                
+            } catch (error) {
+                let statusMessage = '';
+                let statusClass = '';
+                
+                switch (error.code) {
+                    case 'auth/operation-not-allowed':
+                        statusMessage = '❌ Email/Password authentication is NOT ENABLED in Firebase Console';
+                        statusClass = 'status error';
+                        updateDiagnosticResults('❌ Email/Password Provider: NOT ENABLED - Go to Firebase Console → Authentication → Sign-in method → Enable Email/Password');
+                        break;
+                    case 'auth/email-already-in-use':
+                        statusMessage = '✅ Email/Password authentication is ENABLED (test email already exists)';
+                        statusClass = 'status success';
+                        updateDiagnosticResults('✅ Email/Password Provider: ENABLED (existing user)');
+                        break;
+                    case 'auth/unauthorized-domain':
+                        statusMessage = '❌ Domain not authorized in Firebase Console';
+                        statusClass = 'status error';
+                        updateDiagnosticResults('❌ Domain Authorization: FAILED - Add localhost to authorized domains');
+                        break;
+                    default:
+                        statusMessage = `⚠️ Unexpected error: ${error.message}`;
+                        statusClass = 'status warning';
+                        updateDiagnosticResults(`⚠️ Provider Check: ${error.code} - ${error.message}`);
+                }
+                
+                providerStatus.innerHTML = statusMessage;
+                providerStatus.className = statusClass;
+            }
+        }
+
+        // Check network and domain configuration
+        function checkNetworkAndDomains() {
+            networkStatus.innerHTML = '🔄 Checking network and domain configuration...';
+            networkStatus.className = 'status info';
+            
+            const currentDomain = window.location.hostname;
+            const currentOrigin = window.location.origin;
+            
+            let statusMessage = `Current Domain: ${currentDomain}
+Current Origin: ${currentOrigin}
+
+Required Firebase Console Settings:
+• Add "${currentDomain}" to authorized domains
+• Add "localhost" to authorized domains
+• Add "127.0.0.1" to authorized domains (if using IP)
+
+Firebase Console Link: https://console.firebase.google.com/project/gobal-vip-numbers/authentication/settings`;
+
+            networkStatus.innerHTML = statusMessage;
+            networkStatus.className = 'status info';
+            updateDiagnosticResults('ℹ️ Network Check: Domain information displayed');
+        }
+
+        // Test live authentication
+        async function testLiveAuthentication() {
+            authTestStatus.innerHTML = '🔄 Testing live authentication...';
+            authTestStatus.className = 'status info';
+            
+            try {
+                // Test with a non-existent user to check error handling
+                const testEmail = 'test-nonexistent@example.com';
+                const testPassword = 'wrongpassword';
+                
+                await signInWithEmailAndPassword(auth, testEmail, testPassword);
+                
+            } catch (error) {
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    authTestStatus.innerHTML = '✅ Authentication system is working correctly (proper error handling)';
+                    authTestStatus.className = 'status success';
+                    updateDiagnosticResults('✅ Live Authentication: Working correctly');
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    authTestStatus.innerHTML = '❌ Email/Password authentication is not enabled in Firebase Console';
+                    authTestStatus.className = 'status error';
+                    updateDiagnosticResults('❌ Live Authentication: Provider not enabled');
+                } else {
+                    authTestStatus.innerHTML = `⚠️ Authentication error: ${error.message}`;
+                    authTestStatus.className = 'status warning';
+                    updateDiagnosticResults(`⚠️ Live Authentication: ${error.code}`);
+                }
+            }
+        }
+
+        // Check browser console for errors
+        function checkBrowserConsole() {
+            consoleStatus.innerHTML = '🔄 Checking browser console...';
+            consoleStatus.className = 'status info';
+            
+            // Override console.error to capture errors
+            const originalError = console.error;
+            const errors = [];
+            
+            console.error = function(...args) {
+                errors.push(args.join(' '));
+                originalError.apply(console, args);
+            };
+            
+            // Check for common Firebase errors
+            setTimeout(() => {
+                if (errors.length > 0) {
+                    const errorText = errors.join('\n');
+                    consoleStatus.innerHTML = `⚠️ Found ${errors.length} console error(s):\n${errorText}`;
+                    consoleStatus.className = 'status warning';
+                    updateDiagnosticResults(`⚠️ Console Errors: ${errors.length} errors found`);
+                } else {
+                    consoleStatus.innerHTML = '✅ No console errors detected';
+                    consoleStatus.className = 'status success';
+                    updateDiagnosticResults('✅ Console Check: No errors found');
+                }
+                
+                // Restore original console.error
+                console.error = originalError;
+            }, 2000);
+        }
+
+        // Update diagnostic results
+        function updateDiagnosticResults(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            diagnosticResults.innerHTML += `<br/>[${timestamp}] ${message}`;
+        }
+
+        // Event listeners
+        document.getElementById('checkProviders').addEventListener('click', checkAuthenticationProviders);
+        document.getElementById('checkNetwork').addEventListener('click', checkNetworkAndDomains);
+        document.getElementById('testAuth').addEventListener('click', testLiveAuthentication);
+        document.getElementById('checkConsole').addEventListener('click', checkBrowserConsole);
+
+        // Initialize
+        if (checkFirebaseConfig()) {
+            updateDiagnosticResults('🚀 Diagnostic tool loaded successfully');
+        } else {
+            updateDiagnosticResults('❌ Diagnostic tool failed to load Firebase');
+        }
+    </script>
+</body>
+</html>

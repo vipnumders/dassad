@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Email Authentication Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .message {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border: 1px solid #4CAF50;
+        }
+        .error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border: 1px solid #f44336;
+        }
+        .info {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+            border: 1px solid #2196F3;
+        }
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .auth-buttons button {
+            flex: 1;
+            background: #2196F3;
+        }
+        .auth-buttons button:hover {
+            background: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Simple Email Authentication Test</h1>
+        
+        <div id="message" class="message info">
+            Ready to test email authentication
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm">
+            <h3>Login</h3>
+            <div class="form-group">
+                <label for="loginEmail">Email:</label>
+                <input type="email" id="loginEmail" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password">
+            </div>
+            <button id="loginBtn">Login</button>
+        </div>
+
+        <!-- Registration Form -->
+        <div id="registerForm" style="display: none;">
+            <h3>Create Account</h3>
+            <div class="form-group">
+                <label for="registerEmail">Email:</label>
+                <input type="email" id="registerEmail" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">Password:</label>
+                <input type="password" id="registerPassword" placeholder="Enter your password (min 6 characters)">
+            </div>
+            <button id="registerBtn">Create Account</button>
+        </div>
+
+        <!-- User Info -->
+        <div id="userInfo" style="display: none;">
+            <h3>Welcome!</h3>
+            <div id="userDetails"></div>
+            <button id="logoutBtn">Logout</button>
+        </div>
+
+        <!-- Auth Buttons -->
+        <div class="auth-buttons">
+            <button id="showLogin">Show Login</button>
+            <button id="showRegister">Show Register</button>
+        </div>
+
+        <!-- Quick Test Buttons -->
+        <div style="margin-top: 20px;">
+            <button id="testConnection" style="background: #FF9800;">Test Firebase Connection</button>
+            <button id="testProvider" style="background: #9C27B0;">Test Email Provider</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAgVrQTPsIocnQEUioIEKZgcwMXG1t1tHk",
+            authDomain: "gobal-vip-numbers.firebaseapp.com",
+            projectId: "gobal-vip-numbers",
+            storageBucket: "gobal-vip-numbers.appspot.com",
+            messagingSenderId: "1059192210451",
+            appId: "1:1059192210451:web:21551ac29b84619b0fabe6",
+            measurementId: "G-FMF9QNVQW0"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // DOM Elements
+        const message = document.getElementById('message');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const userInfo = document.getElementById('userInfo');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const showLogin = document.getElementById('showLogin');
+        const showRegister = document.getElementById('showRegister');
+        const testConnection = document.getElementById('testConnection');
+        const testProvider = document.getElementById('testProvider');
+
+        // Show message
+        function showMessage(text, type = 'info') {
+            message.textContent = text;
+            message.className = `message ${type}`;
+        }
+
+        // Show forms
+        function showLoginForm() {
+            loginForm.style.display = 'block';
+            registerForm.style.display = 'none';
+            userInfo.style.display = 'none';
+        }
+
+        function showRegisterForm() {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+            userInfo.style.display = 'none';
+        }
+
+        function showUserInfo(user) {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'none';
+            userInfo.style.display = 'block';
+            
+            document.getElementById('userDetails').innerHTML = `
+                <p><strong>Email:</strong> ${user.email}</p>
+                <p><strong>UID:</strong> ${user.uid}</p>
+                <p><strong>Email Verified:</strong> ${user.emailVerified ? 'Yes' : 'No'}</p>
+            `;
+        }
+
+        // Login
+        loginBtn.addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            try {
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Logging in...';
+                
+                const result = await auth.signInWithEmailAndPassword(email, password);
+                showMessage('Login successful!', 'success');
+                showUserInfo(result.user);
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage(getErrorMessage(error), 'error');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
+        });
+
+        // Register
+        registerBtn.addEventListener('click', async () => {
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+
+            if (!email || !password) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            try {
+                registerBtn.disabled = true;
+                registerBtn.textContent = 'Creating account...';
+                
+                const result = await auth.createUserWithEmailAndPassword(email, password);
+                showMessage('Account created successfully!', 'success');
+                showUserInfo(result.user);
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                showMessage(getErrorMessage(error), 'error');
+            } finally {
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Create Account';
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await auth.signOut();
+                showMessage('Logged out successfully', 'info');
+                showLoginForm();
+            } catch (error) {
+                console.error('Logout error:', error);
+                showMessage('Logout failed', 'error');
+            }
+        });
+
+        // Test Firebase connection
+        testConnection.addEventListener('click', () => {
+            try {
+                const app = firebase.app();
+                showMessage(`✅ Firebase connected! Project: ${app.options.projectId}`, 'success');
+            } catch (error) {
+                showMessage(`❌ Firebase connection failed: ${error.message}`, 'error');
+            }
+        });
+
+        // Test email provider
+        testProvider.addEventListener('click', async () => {
+            try {
+                const testEmail = `test-${Date.now()}@example.com`;
+                const testPassword = 'testpassword123';
+                
+                const result = await auth.createUserWithEmailAndPassword(testEmail, testPassword);
+                showMessage('✅ Email provider is working!', 'success');
+                console.log('Test user created:', result.user.uid);
+                
+            } catch (error) {
+                if (error.code === 'auth/operation-not-allowed') {
+                    showMessage('❌ Email/Password authentication is NOT enabled in Firebase Console', 'error');
+                } else if (error.code === 'auth/email-already-in-use') {
+                    showMessage('✅ Email provider is working (test email exists)', 'success');
+                } else {
+                    showMessage(`⚠️ Provider test error: ${error.message}`, 'error');
+                }
+            }
+        });
+
+        // Event listeners
+        showLogin.addEventListener('click', showLoginForm);
+        showRegister.addEventListener('click', showRegisterForm);
+
+        // Auth state listener
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                showUserInfo(user);
+            } else {
+                showLoginForm();
+            }
+        });
+
+        // Error message helper
+        function getErrorMessage(error) {
+            switch (error.code) {
+                case 'auth/user-not-found':
+                    return 'No account found with this email address.';
+                case 'auth/wrong-password':
+                    return 'Incorrect password. Please try again.';
+                case 'auth/invalid-email':
+                    return 'Please enter a valid email address.';
+                case 'auth/user-disabled':
+                    return 'This account has been disabled.';
+                case 'auth/too-many-requests':
+                    return 'Too many failed attempts. Please try again later.';
+                case 'auth/network-request-failed':
+                    return 'Network error. Please check your connection.';
+                case 'auth/email-already-in-use':
+                    return 'An account with this email already exists.';
+                case 'auth/weak-password':
+                    return 'Password is too weak. Please choose a stronger password.';
+                case 'auth/operation-not-allowed':
+                    return 'Email/password authentication is not enabled. Please contact support.';
+                default:
+                    return `Error: ${error.message}`;
+            }
+        }
+
+        // Initialize
+        showMessage('Firebase authentication ready. Click "Test Firebase Connection" to verify setup.', 'info');
+    </script>
+</body>
+</html>

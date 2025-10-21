@@ -1,0 +1,2324 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="login-style.css">
+<link rel="stylesheet" href="chatbot.css">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Vip Numbers</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Firebase SDK - Modern Version -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+      import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+      
+      // Make imports available globally
+      window.initializeApp = initializeApp;
+      window.getAuth = getAuth;
+      window.GoogleAuthProvider = GoogleAuthProvider;
+      window.signInWithPopup = signInWithPopup;
+      window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+      window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+      window.sendPasswordResetEmail = sendPasswordResetEmail;
+      window.onAuthStateChanged = onAuthStateChanged;
+      window.signOut = signOut;
+    </script>
+    <!-- Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>    
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000000;
+            color: #ffffff;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        /* Add these styles for the filters */
+        .filter-container {
+            margin-top: 5px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .column-filter {
+            width: 100%;
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #4CAF50;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .filter-input {
+            padding: 8px 12px;
+            border: 2px solid rgba(76, 175, 80, 0.3);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .filter-input::placeholder {
+            color: #999;
+        }
+        
+        /* Modern Button Styles */
+        .filter-button, .export-button, .search-button, .pagination-button {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+        
+        .filter-button:hover, .export-button:hover, .search-button:hover, .pagination-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .filter-button:active, .export-button:active, .search-button:active, .pagination-button:active {
+            transform: translateY(0);
+        }
+        
+        .pagination-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .search-filter-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-filter-input {
+            flex-grow: 1;
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        
+        /* Pagination styles */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .pagination-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .pagination-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .pagination-info {
+            margin: 0 15px;
+            line-height: 32px;
+            font-size: 14px;
+        }
+
+        .page-numbers {
+            display: flex;
+            align-items: center;
+        }
+
+        .page-number-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin: 0 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .page-number-button:hover {
+            background-color: #45a049;
+        }
+
+        .page-number-button.active {
+            background-color: #357a38;
+        }
+        
+        /* Login Section Integration */
+        .login-section {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .login-section .login-container {
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .login-section .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-section .logo-section h2 {
+            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-section .logo-section p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .login-section .google-login-btn {
+            background: white;
+            color: #333;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-section .google-login-btn:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .login-section .input-group input {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid #ddd;
+            color: #333;
+        }
+        
+        .login-section .input-group input::placeholder {
+            color: #999;
+        }
+        
+        .login-section .input-group input:focus {
+            border-color: #4CAF50;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+        
+        .login-section .divider span {
+            background: rgba(255, 255, 255, 0.8);
+            color: #666;
+        }
+        
+        .login-section .divider::before {
+            background: #ddd;
+        }
+        
+        /* Profile Section Integration */
+        .profile-section {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .profile-section .profile-container {
+            max-width: 350px;
+            width: 100%;
+        }
+        
+        .profile-section .profile-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .profile-section .profile-header h2 {
+            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .profile-section .profile-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        /* Hide main content when not logged in */
+        .main-content {
+            display: none;
+        }
+        
+        .main-content.visible {
+            display: block;
+        }
+
+        #result-count {
+            color: white;
+            font-weight: 500;
+        }
+        
+        /* Authentication Options Styles */
+        .auth-options {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .auth-toggle-btn {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px 0;
+            padding: 8px 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .auth-toggle-btn:hover {
+            color: #4CAF50;
+        }
+        
+        .highlight-text {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+        
+        .form-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .form-header h3 {
+            color: #333;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .form-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Back to login button */
+        .back-to-login {
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .back-to-login button {
+            background: none;
+            border: none;
+            color: #4CAF50;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: underline;
+        }
+        
+        .back-to-login button:hover {
+            color: #45a049;
+        }
+        
+        /* Styled Table Columns */
+        .vip-number {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #4CAF50;
+            font-size: 1.1em;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .status-active {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border: 1px solid #4CAF50;
+        }
+        
+        .status-available {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+            border: 1px solid #2196F3;
+        }
+        
+        .status-default {
+            background: rgba(158, 158, 158, 0.2);
+            color: #9E9E9E;
+            border: 1px solid #9E9E9E;
+        }
+        
+        .digit-sum {
+            font-weight: bold;
+            color: #FF9800;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        .category-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .category-prepaid {
+            background: rgba(255, 152, 0, 0.2);
+            color: #FF9800;
+            border: 1px solid #FF9800;
+        }
+        
+        .category-postpaid {
+            background: rgba(156, 39, 176, 0.2);
+            color: #9C27B0;
+            border: 1px solid #9C27B0;
+        }
+        
+        .category-default {
+            background: rgba(158, 158, 158, 0.2);
+            color: #9E9E9E;
+            border: 1px solid #9E9E9E;
+        }
+        
+        .price-value {
+            font-weight: bold;
+            color: #4CAF50;
+            text-align: right;
+            font-size: 1.05em;
+        }
+        
+        /* Responsive table adjustments */
+        @media (max-width: 768px) {
+            .status-badge, .category-badge {
+                font-size: 0.75em;
+                padding: 2px 6px;
+            }
+            
+            .vip-number, .digit-sum, .price-value {
+                font-size: 0.9em;
+            }
+        }
+
+        /* Masonry Card Layout */
+        .results-cards-container {
+            margin-top: 20px;
+        }
+
+        .masonry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .vip-card {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vip-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .vip-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4CAF50, #2196F3, #FF9800);
+        }
+
+        .vip-number-display {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .vip-number-main {
+            font-size: 1.8em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 5px;
+            text-shadow: 0 6px 26px rgba(184, 139, 37, 0.12), 0 1px 0 rgba(0, 0, 0, 0.6);
+        }
+
+        .vip-price {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #4CAF50;
+            margin-bottom: 5px;
+        }
+
+        .vip-sum {
+            font-size: 1.1em;
+            color: #FF9800;
+            font-weight: 500;
+        }
+
+        .buy-now-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000000;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .buy-now-btn:hover {
+            background: linear-gradient(135deg, #FFA500, #FFD700);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Card Animation */
+        @keyframes fadeInSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .vip-card:nth-child(1) { animation-delay: 0.1s; }
+        .vip-card:nth-child(2) { animation-delay: 0.2s; }
+        .vip-card:nth-child(3) { animation-delay: 0.3s; }
+        .vip-card:nth-child(4) { animation-delay: 0.4s; }
+        .vip-card:nth-child(5) { animation-delay: 0.5s; }
+        .vip-card:nth-child(6) { animation-delay: 0.6s; }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #f44336;
+        }
+
+        .modal-body {
+            padding: 30px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .scroll-btn {
+            width: 100%;
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .scroll-btn:hover {
+            background: #1976D2;
+        }
+
+        .vip-number-display {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .vip-number-display h3 {
+            color: #333;
+            margin: 0 0 10px 0;
+            font-size: 1.4em;
+            font-family: 'Courier New', monospace;
+        }
+
+        .vip-number-display p {
+            color: #4CAF50;
+            margin: 0;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .form-group textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .btn-cancel,
+        .btn-submit {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #d32f2f;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000000;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(135deg, #FFA500, #FFD700);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 0 10px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+            }
+
+            .nav-links {
+                text-align: center;
+                margin: 15px 0;
+            }
+
+            .nav-links a {
+                display: inline-block;
+                margin: 5px 10px;
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+
+            .login-section .login-container,
+            .profile-section .profile-container {
+                max-width: 100%;
+                padding: 0 10px;
+            }
+
+            .login-section .login-card,
+            .profile-section .profile-card {
+                padding: 1.5rem;
+            }
+
+            .search-container {
+                padding: 15px;
+                margin: 15px 0;
+            }
+
+            .enhanced-search-container {
+                padding: 15px;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 10px;
+            }
+
+            .filter-item {
+                margin-bottom: 10px;
+            }
+
+            .filter-input,
+            .search-input {
+                font-size: 16px; /* Prevent zoom on iOS */
+                padding: 10px;
+            }
+
+            .search-button,
+            .filter-button,
+            .export-button {
+                padding: 10px 16px;
+                font-size: 16px;
+                min-height: 44px; /* Touch-friendly */
+            }
+
+            .masonry-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+                padding: 10px 0;
+            }
+
+            .vip-card {
+                padding: 12px;
+                min-height: 120px;
+            }
+
+            .vip-number-main {
+                font-size: 1.2em;
+            }
+
+            .vip-price,
+            .vip-sum {
+                font-size: 0.9em;
+            }
+
+            .buy-now-btn {
+                padding: 10px;
+                font-size: 14px;
+                min-height: 44px;
+            }
+
+            .pagination-container {
+                padding: 10px;
+            }
+
+            .pagination-button,
+            .page-number-button {
+                padding: 8px 12px;
+                font-size: 14px;
+                min-height: 36px;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+                max-height: 90vh;
+            }
+
+            .modal-body {
+                padding: 15px;
+                max-height: 70vh;
+                overflow-y: auto;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn-cancel,
+            .btn-submit {
+                width: 100%;
+                padding: 12px;
+                font-size: 16px;
+                min-height: 44px;
+            }
+
+            .form-group input,
+            .form-group textarea {
+                font-size: 16px;
+                padding: 12px;
+                min-height: 44px;
+            }
+
+            .form-group textarea {
+                height: 80px;
+            }
+
+            /* Chatbot adjustments */
+            #chatbot-container {
+                bottom: 20px;
+                right: 20px;
+            }
+
+            #chatbot-window {
+                width: 280px;
+                right: -280px;
+            }
+        }
+
+        /* Additional breakpoint for very small screens */
+        @media (max-width: 480px) {
+            .masonry-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .vip-card {
+                padding: 10px;
+                min-height: 100px;
+            }
+
+            .vip-number-main {
+                font-size: 1em;
+            }
+
+            .filters-grid {
+                padding: 8px;
+            }
+
+            .modal-content {
+                width: 98%;
+                margin: 2% auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    
+   
+
+ <div class="container">
+       <div class="golden-logo.png.png">
+      <img src="golden-logo.png.png" alt="Golden Vip Numbers Logo" width="100">
+      
+    </div>
+
+        <h1>Golden Vip Numbers</h1>
+
+        <!-- Navigation Links -->
+        <div class="nav-links" style="text-align: center; margin: 20px 0;">
+            <a href="terms.html#terms" style="color: #ffffff; text-decoration: none; font-weight: 500; margin: 0 15px; padding: 8px 16px; border-radius: 8px; background: rgba(15, 15, 14, 0.1); transition: all 0.3s ease;">Terms & Conditions</a>
+            <a href="terms.html#privacy" style="color: #ffffff; text-decoration: none; font-weight: 500; margin: 0 15px; padding: 8px 16px; border-radius: 8px; background: rgba(15, 15, 14, 0.1); transition: all 0.3s ease;">Privacy Policy</a>
+           <a href="happy.html" style="color: #ffffff; text-decoration: none; font-weight: 500; margin: 0 15px; padding: 8px 16px; border-radius: 8px; background: rgba(15, 15, 14, 0.1); transition: all 0.3s ease;">Happy Customers</a>
+        
+        <!-- Login System -->
+        <div id="login-section" class="login-section">
+            <div class="login-container">
+                <div class="login-card">
+                    <!-- Logo/Title Area -->
+                    <div class="logo-section">
+                        <div class="logo">
+                            <span class="logo-icon">⚡</span>
+                        </div>
+                        <h2>Welcome Back</h2>
+                        <p>Sign in to access Golden Vip Numbers</p>
+                    </div>
+
+                    <!-- Google Login Button -->
+                    <button id="google-login-btn" class="google-login-btn">
+                        <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        Continue with Google
+                    </button>
+
+                    <!-- Divider -->
+                    <div class="divider">
+                        <span>or</span>
+                    </div>
+
+                    <!-- Email/Password Form -->
+                    <form id="email-login-form" class="email-form">
+                        <div class="input-group">
+                            <input type="email" id="email" required placeholder=" ">
+                            <label for="email">Email Address</label>
+                            <span class="input-icon">📧</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="password" id="password" required placeholder=" ">
+                            <label for="password">Password</label>
+                            <span class="input-icon">🔒</span>
+                        </div>
+                        <button type="submit" class="login-btn">
+                            <span class="btn-text">Login</span>
+                            <div class="btn-loader hidden">
+                                <div class="spinner-small"></div>
+                            </div>
+                        </button>
+                    </form>
+                    
+                    <!-- Authentication Options -->
+                    <div class="auth-options">
+                        <button type="button" id="register-btn" class="auth-toggle-btn">
+                            Don't have an account? <span class="highlight-text">Sign up</span>
+                        </button>
+                        <button type="button" id="forgot-password-btn" class="auth-toggle-btn">
+                            Forgot password? <span class="highlight-text">Reset</span>
+                        </button>
+                </div>
+                    
+                    <!-- Registration Form (Hidden by default) -->
+                    <form id="email-register-form" class="email-form" style="display: none;">
+                        <div class="form-header">
+                            <h3>Create Account</h3>
+                            <p>Sign up for Golden Vip Numbers</p>
+            </div>
+                        <div class="input-group">
+                            <input type="email" id="register-email" required placeholder=" ">
+                            <label for="register-email">Email Address</label>
+                            <span class="input-icon">📧</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="password" id="register-password" required placeholder=" " minlength="6">
+                            <label for="register-password">Password (min 6 characters)</label>
+                            <span class="input-icon">🔒</span>
+                        </div>
+                        <div class="input-group">
+                            <input type="password" id="confirm-password" required placeholder=" ">
+                            <label for="confirm-password">Confirm Password</label>
+                            <span class="input-icon">🔒</span>
+                        </div>
+                        <button type="submit" class="login-btn">
+                            <span class="btn-text">Create Account</span>
+                            <div class="btn-loader hidden">
+                                <div class="spinner-small"></div>
+                            </div>
+                        </button>
+                        <div class="back-to-login">
+                            <button type="button" id="back-to-login-from-register">Back to Login</button>
+                        </div>
+                    </form>
+                    
+                    <!-- Password Reset Form (Hidden by default) -->
+                    <form id="password-reset-form" class="email-form" style="display: none;">
+                        <div class="form-header">
+                            <h3>Reset Password</h3>
+                            <p>Enter your email to receive a password reset link</p>
+                        </div>
+                        <div class="input-group">
+                            <input type="email" id="reset-email" required placeholder=" ">
+                            <label for="reset-email">Email Address</label>
+                            <span class="input-icon">📧</span>
+                        </div>
+                        <button type="submit" class="login-btn">
+                            <span class="btn-text">Send Reset Link</span>
+                            <div class="btn-loader hidden">
+                                <div class="spinner-small"></div>
+                            </div>
+                        </button>
+                        <div class="back-to-login">
+                            <button type="button" id="back-to-login-from-reset">Back to Login</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="profile-circle" style="display: none;">
+            <img id="profile-image-circle" src="" alt="Profile">
+            <span id="profile-initials-circle">U</span>
+        </div>
+        <!-- Profile Dropdown (Hidden by default) -->
+        <div id="profile-dropdown" style="display: none;">
+            <div class="profile-header">
+                <h2 id="profile-name-dropdown">User Name</h2>
+            </div>
+            <div class="profile-actions">
+                <button id="logout-btn-dropdown" class="logout-btn">
+                    <span class="logout-icon">🚪</span>
+                    Logout
+                </button>
+            </div>
+        </div>
+
+
+        <!-- Main Content (Hidden until login) -->
+        <div class="main-content" id="main-content" style="display:none;">
+            <div class="search-container">
+                <form action="#" method="get" id="search-form">
+                    
+                <input type="text" class="search-input" placeholder="Search for VIP numbers..." name="search" id="search-input">
+                    </div>
+                </form>
+                <!-- Enhanced Number Search Bar -->
+                <div class="enhanced-search-container">
+                    <div class="enhanced-search-title">Advanced Number Search</div>
+                    <div class="enhanced-search-content">
+                        <div class="search-type-container">
+                            <div class="search-type-options">
+                                <label><input type="radio" name="searchType" value="anywhere" checked> Anywhere</label>
+                                <label><input type="radio" name="searchType" value="startsWith"> Starts With</label>
+                                <label><input type="radio" name="searchType" value="endsWith"> Ends With</label>
+                                <label><input type="radio" name="searchType" value="exactMatch"> Exact Match</label>
+                            </div>
+                            <div class="enhanced-search-input-container">
+                                <input type="text" id="enhanced-search-input" class="enhanced-search-input" placeholder="Enter digits to search...">
+                                <button id="enhanced-search-button" class="enhanced-search-button">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                         
+
+                            <div class="enhanced-search-input-container filter-container">
+                                <input type="text" id="exclude-digits-input" class="enhanced-search-input" placeholder="Exclude digits...">
+                                <button id="exclude-digits-button" class="enhanced-search-button" style="display: none;">
+                                    <i class="fas fa-search-minus"></i> Exclude
+                                </button>
+                            </div>
+                            <div class="filters-grid">
+                                <div class="filter-item">
+                                    <label for="sumFilter" class="filter-label">Sum Filter</label>
+                                    <input type="text" id="sumFilter" class="filter-input" placeholder="7030011355 =7" oninput="applyFiltersAuto()">
+                                </div>
+                                <div class="filter-item">
+                                    <label for="priceRangeFilter" class="filter-label">Price Range</label>
+                                    <select id="priceRangeFilter" class="filter-input" onchange="applyFiltersAuto()">
+                                        <option value="">All Prices</option>
+                                        <option value="0-1000">₹0 - ₹1,000</option>
+                                        <option value="1000-5000">₹1,000 - ₹5,000</option>
+                                        <option value="5000-10000">₹5,000 - ₹10,000</option>
+                                        <option value="10000-50000">₹10,000 - ₹50,000</option>
+                                        <option value="50000-100000">₹50,000 - ₹1,00,000</option>
+                                    </select>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <style>
+                    .search-input-container {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        margin-bottom: 20px;
+                    }
+                    
+                    .search-input {
+                        flex: 1;
+                        padding: 12px;
+                        border: 2px solid #ddd;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        transition: border-color 0.3s ease;
+                    }
+                    
+                    .search-input:focus {
+                        outline: none;
+                        border-color: #4CAF50;
+                        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+                    }
+                    
+                    .search-button {
+                        background: #4CAF50;
+                        color: white;
+                        border: none;
+                        padding: 12px 20px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        font-weight: 600;
+                        transition: all 0.3s ease;
+                        white-space: nowrap;
+                    }
+                    
+                    .search-button:hover {
+                        background: #45a049;
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+                    }
+                    
+                    #show-all-btn:hover {
+                        background: #1976D2 !important;
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+                    }
+                    
+                    .enhanced-search-input-container {
+                        display: flex;
+                        align-items: center;
+                        margin-top: 10px;
+                    }
+                </style>
+            </div>
+
+            <!-- Optional Bar 1: Specific Digit Search -->
+            <div class="optional-bar" hidden>
+                <div class="optional-bar-title">Search by Specific Digits</div>
+                <div class="optional-bar-content">
+                    <div class="digit-search-container">
+                        <div class="digit-search-label">Include only these digits:</div>
+                        <div class="digit-checkboxes">
+                            <label><input type="checkbox" id="select-all-digits"> Select All</label>
+                            <label><input type="checkbox" class="digit-checkbox" value="0"> 0</label>
+                            <label><input type="checkbox" class="digit-checkbox" value="1"> 1</label>
+                            <label><input type="checkbox" class="digit-checkbox" value="2"> 2</label>
+                            <label><input type="checkbox" class="digit-checkbox" value="3"> 3</label>
+                            <label><input type="checkbox" class="digit-checkbox" value="4"> 4</label>
+                            <label><input type="checkbox" class="digit-checkbox" value="5"> 5</label>
+                            <label><input type="checkbox" class="digit-checkbox" value="6"> 6</label>
+                            <label><input type="checkbox" class="digit-checkbox" value="7"> 7</label>
+                            <label><input type="checkbox" class="digit-checkbox" value="8"> 8</label>
+                            <label><input type="checkbox" class="digit-checkbox" value="9"> 9</label>
+                        </div>
+                    
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Calculator result display -->
+            <div class="calc-result" id="calc-result">
+                <div id="calculation"></div>
+                <div id="result"></div>
+            </div>
+
+   
+        <!-- Controls for export -->
+        <div class="controls-container" id="controls-container" style="display: none;">
+            <div>
+                <!-- Hide Results button removed as per user request -->
+            </div>
+            <div>
+                <span id="result-count"></span>
+            </div>
+        </div>
+                 
+       
+
+            <!-- VIP Numbers Card Grid -->   
+    
+            <div class="results-cards-container" id="results-container" style="display: none;">
+                <div class="masonry-grid" id="masonry-grid">
+                    <!-- VIP Number cards will be populated here via JavaScript -->
+                                </div>
+                
+        <!-- Pagination controls -->
+                <div class="pagination-container" id="pagination-container">
+                    <button id="prev-page" class="pagination-button">
+                        Previous
+                    </button>
+                    <div id="page-numbers" class="page-numbers">
+                        <!-- Page number buttons will be added here -->
+                    </div>
+                    <button id="next-page" class="pagination-button">
+                        Next
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div> <!-- End main-content -->
+    
+    <!-- Chatbot Container -->
+    <div id="chatbot-container">
+        <div id="chatbot-icon">
+            <img src="https://img.icons8.com/color/48/whatsapp--v1.png" alt="WhatsApp Chat">
+        </div>
+        <div id="chatbot-window" class="hidden">
+            <div id="chatbot-header">
+                <h3>Contact Us</h3>
+            </div>
+            <div id="chatbot-body">
+                <p>Click on a number to contact us on WhatsApp:</p>
+                <button class="contact-button" data-number="9168480110+">9168480110</button>
+                <button class="contact-button" data-number="9975518888">9975518888</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buy Now Modal -->
+    <div id="buyNowModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Purchase VIP Number</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="vip-number-display">
+                    <h3 id="selectedVipNumber">VIP Number</h3>
+                    <p id="selectedVipPrice">Price</p>
+                </div>
+                <form id="purchaseForm">
+                    <div class="form-group">
+                        <label for="customerName">Full Name *</label>
+                        <input type="text" id="customerName" required placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="customerPhone">Phone Number *</label>
+                        <input type="tel" id="customerPhone" required placeholder="Enter your phone number">
+                    </div>
+                    <div class="form-group">
+                        <label for="customerPincode">Pincode *</label>
+                        <input type="text" id="customerPincode" required placeholder="Enter your pincode">
+                    </div>
+                    <div class="form-group">
+                        <label for="customerAddress">Full Address *</label>
+                        <textarea id="customerAddress" required placeholder="Enter your complete address"></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel">Cancel</button>
+                        <button type="submit" class="btn-submit">Submit Inquiry</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Enhanced search functionality
+document.getElementById('enhanced-search-button').addEventListener('click', function() {
+    performEnhancedSearch();
+});
+
+// Also trigger search on Enter key
+document.getElementById('enhanced-search-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        performEnhancedSearch();
+    }
+});
+
+document.getElementById('exclude-digits-button').addEventListener('click', function() {
+    performEnhancedSearch();
+});
+
+// Auto-apply for enhanced search inputs
+document.getElementById('enhanced-search-input').addEventListener('input', function() {
+    performEnhancedSearch();
+});
+
+document.getElementById('exclude-digits-input').addEventListener('input', function() {
+    performEnhancedSearch();
+});
+
+// Function to perform enhanced search based on selected options
+function performEnhancedSearch() {
+    const searchDigits = document.getElementById('enhanced-search-input').value.trim();
+    const excludeDigits = document.getElementById('exclude-digits-input').value.trim();
+
+    if (!searchDigits && !excludeDigits) {
+        alert('Please enter digits to search for or exclude.');
+        return;
+    }
+
+    // Get the selected search type
+    const searchType = document.querySelector('input[name="searchType"]:checked').value;
+
+    // Filter the cell data based on search type and digits
+    let results = cellData.filter(row => {
+        const cellNumber = row[0] ? row[0].toString() : '';
+
+        if (excludeDigits) {
+            for (let i = 0; i < excludeDigits.length; i++) {
+                if (cellNumber.includes(excludeDigits[i])) {
+                    return false;
+                }
+            }
+        }
+
+        if (!searchDigits) return true;
+
+        // Check for special filter syntax
+        if (searchDigits.startsWith('sum:')) {
+            const sumValue = searchDigits.substring(4);
+            const digitSum = calculateDigitSum(cellNumber);
+            return applySumFilter(digitSum, sumValue);
+        } else if (searchDigits.startsWith('price:')) {
+            const priceRange = searchDigits.substring(6);
+            const [minPrice, maxPrice] = priceRange.split('-').map(Number);
+            const price = parseFloat(row[5]) || 0;
+            return price >= minPrice && price <= maxPrice;
+        }
+
+        switch(searchType) {
+            case 'startsWith':
+                return cellNumber.startsWith(searchDigits);
+            case 'endsWith':
+                return cellNumber.endsWith(searchDigits);
+            case 'exactMatch':
+                return cellNumber === searchDigits;
+            case 'anywhere':
+            default:
+                return cellNumber.includes(searchDigits);
+        }
+    });
+
+    // Apply any active filters
+    const filteredResults = applyFilters(results);
+
+    // Display results
+    document.getElementById('results-container').style.display = 'block';
+    populateTable(filteredResults, searchDigits);
+
+    // Update the main search input to show what we're searching for
+    let searchTermText = '';
+    if (searchDigits) {
+        if (searchDigits.startsWith('sum:')) {
+            searchTermText += `Sum filter: ${searchDigits.substring(4)}`;
+        } else if (searchDigits.startsWith('price:')) {
+            const [min, max] = searchDigits.substring(6).split('-');
+            searchTermText += `Price range: ₹${min} - ₹${max}`;
+        } else {
+            searchTermText += `${searchType === 'startsWith' ? 'Starts with' :
+              searchType === 'endsWith' ? 'Ends with' :
+              searchType === 'exactMatch' ? 'Exact match' :
+              'Contains'}: ${searchDigits}`;
+        }
+    }
+    if (excludeDigits) {
+        if (searchTermText) searchTermText += ', ';
+        searchTermText += `excluding ${excludeDigits}`;
+    }
+    document.getElementById('search-input').value = searchTermText;
+}
+
+// Helper function to apply sum filter
+function applySumFilter(digitSum, filterValue) {
+    if (filterValue.startsWith('>')) {
+        const compareValue = parseInt(filterValue.substring(1).trim(), 10);
+        return !isNaN(compareValue) && digitSum > compareValue;
+    } else if (filterValue.startsWith('<')) {
+        const compareValue = parseInt(filterValue.substring(1).trim(), 10);
+        return !isNaN(compareValue) && digitSum < compareValue;
+    } else if (filterValue.startsWith('=')) {
+        const compareValue = parseInt(filterValue.substring(1).trim(), 10);
+        return !isNaN(compareValue) && digitSum === compareValue;
+    } else {
+        const compareValue = parseInt(filterValue, 10);
+        return !isNaN(compareValue) && digitSum === compareValue;
+    }
+}
+
+        // Event listener for the "Select All" checkbox
+document.getElementById('select-all-digits').addEventListener('change', function() {
+    const isChecked = this.checked;
+    const digitCheckboxes = document.querySelectorAll('.digit-checkbox');
+    
+    // Set all digit checkboxes to match the "Select All" state
+    digitCheckboxes.forEach(checkbox => {
+        checkbox.checked = isChecked;
+    });
+});
+
+// Update "Select All" checkbox when individual checkboxes change
+document.querySelectorAll('.digit-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const allCheckboxes = document.querySelectorAll('.digit-checkbox');
+        const checkedCheckboxes = document.querySelectorAll('.digit-checkbox:checked');
+        
+        // If all checkboxes are checked, check the "Select All" checkbox
+        // If not all checkboxes are checked, uncheck the "Select All" checkbox
+        document.getElementById('select-all-digits').checked = 
+            allCheckboxes.length === checkedCheckboxes.length;
+    });
+});
+
+      
+        // Pagination variables
+        let currentPage = 1;
+        let resultsPerPage = 20;
+        let currentResults = [];
+
+        // Function to check if input is a mathematical expression
+        function isMathExpression(input) {
+            // Check if the input contains any mathematical operators
+            return /[\+\-\*\/\(\)]/.test(input);
+        }
+
+        // Function to safely evaluate mathematical expressions
+        function evaluateMathExpression(expression) {
+            try {
+                // Using Function constructor to evaluate the expression safely
+                // This is safer than eval() but still needs to be used with caution
+                return new Function('return ' + expression)();
+            } catch (error) {
+                return 'Invalid expression';
+            }
+        }
+
+        // Function to calculate sum of digits in a number
+        function calculateDigitSum(number) {
+            if (!number) return 0;
+            
+            // Remove non-digit characters
+            const digitsOnly = number.toString().replace(/[^0-9]/g, '');
+            
+            // Sum the digits
+            let sum = 0;
+            for (let i = 0; i < digitsOnly.length; i++) {
+                sum += parseInt(digitsOnly.charAt(i), 10);
+            }
+
+            while (sum > 9) {
+                sum = sum.toString().split('').reduce((acc, digit) => acc + parseInt(digit, 10), 0);
+            }
+            
+            return sum;
+        }
+
+        // Function to apply remaining filters (Price and Sum only)
+        function applyFilters(results) {
+            const priceRangeFilter = document.getElementById('priceRangeFilter')?.value;
+            const sumFilter = document.getElementById('sumFilter')?.value?.trim();
+
+            return results.filter(row => {
+                const price = parseFloat(row[5]) || 0;
+                const cellNumber = row[0] || ''; // Use the first column for sum calculation
+                const digitSum = calculateDigitSum(cellNumber);
+                
+                // Price range filter
+                let priceMatch = true;
+                if (priceRangeFilter) {
+                    const [minPrice, maxPrice] = priceRangeFilter.split('-').map(Number);
+                    priceMatch = price >= minPrice && price <= maxPrice;
+                }
+                
+                // Sum filter
+                let sumMatch = true;
+                if (sumFilter) {
+                    // Check if it's a comparison operator
+                    if (sumFilter.startsWith('>')) {
+                        const compareValue = parseInt(sumFilter.substring(1).trim(), 10);
+                        if (!isNaN(compareValue)) {
+                            sumMatch = digitSum > compareValue;
+                        }
+                    } else if (sumFilter.startsWith('<')) {
+                        const compareValue = parseInt(sumFilter.substring(1).trim(), 10);
+                        if (!isNaN(compareValue)) {
+                            sumMatch = digitSum < compareValue;
+                        }
+                    } else if (sumFilter.startsWith('=')) {
+                        const compareValue = parseInt(sumFilter.substring(1).trim(), 10);
+                        if (!isNaN(compareValue)) {
+                            sumMatch = digitSum === compareValue;
+                        }
+                    } else {
+                        // Direct value match
+                        const compareValue = parseInt(sumFilter, 10);
+                        if (!isNaN(compareValue)) {
+                            sumMatch = digitSum === compareValue;
+                        }
+                    }
+                }
+
+                return priceMatch && sumMatch;
+            });
+        }
+
+        // Function to search cell data
+        function searchCellData(searchTerm) {
+            if (!searchTerm) return [];
+
+            // Check if it's a math expression
+            if (isMathExpression(searchTerm)) {
+                const result = evaluateMathExpression(searchTerm);
+
+                // Display the calculation result
+                const calcResultDiv = document.getElementById('calc-result');
+                calcResultDiv.style.display = 'block';
+                calcResultDiv.innerHTML = `
+                    <div><strong>Expression:</strong> ${searchTerm}</div>
+                    <div><strong>Result:</strong> ${result}</div>
+                `;
+
+                // Search for the result in the cell data
+                return cellData.filter(row => {
+                    return row.some(cell =>
+                        cell && cell.toString().includes(result.toString())
+                    );
+                });
+            } else {
+                // Hide calculation result for regular searches
+                document.getElementById('calc-result').style.display = 'none';
+
+                // Regular search
+                searchTerm = searchTerm.toLowerCase();
+                return cellData.filter(row => {
+                    return row.some(cell =>
+                        cell && cell.toString().toLowerCase().includes(searchTerm)
+                    );
+                });
+            }
+        }
+
+        // Function to highlight search term in results
+        function highlightText(text, searchTerm) {
+            if (!searchTerm || !text) return text;
+
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            return text.toString().replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        // Function to get paginated results
+        function getPaginatedResults() {
+            const startIndex = (currentPage - 1) * resultsPerPage;
+            const endIndex = startIndex + resultsPerPage;
+            return currentResults.slice(startIndex, endIndex);
+        }
+
+        // Function to update pagination controls
+        function updatePaginationControls() {
+            const totalPages = Math.ceil(currentResults.length / resultsPerPage);
+            const prevButton = document.getElementById('prev-page');
+            const nextButton = document.getElementById('next-page');
+            const pageNumbersDiv = document.getElementById('page-numbers');
+
+            // Clear existing page numbers
+            pageNumbersDiv.innerHTML = '';
+
+            // Generate page number buttons
+            const maxVisiblePages = 5; // Show up to 5 page numbers
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.className = 'page-number-button';
+                pageButton.textContent = i;
+                if (i === currentPage) {
+                    pageButton.classList.add('active');
+                }
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    const searchTerm = document.getElementById('search-input').value.trim();
+                    refreshTable(searchTerm);
+                });
+                pageNumbersDiv.appendChild(pageButton);
+            }
+
+            prevButton.disabled = currentPage <= 1;
+            nextButton.disabled = currentPage >= totalPages || totalPages === 0;
+
+            // Show/hide pagination container based on results
+            const paginationContainer = document.getElementById('pagination-container');
+            paginationContainer.style.display = totalPages > 1 ? 'flex' : 'none';
+        }
+
+        // Helper functions for styling table columns
+        function getStatusClass(status) {
+            switch(status.toUpperCase()) {
+                case 'ACTIVE': return 'status-active';
+                case 'AVAILABLE': return 'status-available';
+                default: return 'status-default';
+            }
+        }
+
+        function getStatusIcon(status) {
+            switch(status.toUpperCase()) {
+                case 'ACTIVE': return '🟢';
+                case 'AVAILABLE': return '🔵';
+                default: return '⚪';
+            }
+        }
+
+        function getCategoryClass(category) {
+            switch(category.toUpperCase()) {
+                case 'PREPAID': return 'category-prepaid';
+                case 'POSTPAID': return 'category-postpaid';
+                default: return 'category-default';
+            }
+        }
+
+        function getCategoryIcon(category) {
+            switch(category.toUpperCase()) {
+                case 'PREPAID': return '📱';
+                case 'POSTPAID': return '📞';
+                default: return '📋';
+            }
+        }
+
+        function formatPrice(price) {
+            if (!price || price === '') return 'N/A';
+            const numPrice = parseFloat(price);
+            if (isNaN(numPrice)) return price;
+            return '₹' + numPrice.toLocaleString('en-IN');
+        }
+
+        // Function to populate the results cards
+        function populateTable(results, searchTerm) {
+            const masonryGrid = document.getElementById('masonry-grid');
+            const controlsContainer = document.getElementById('controls-container');
+            const resultCount = document.getElementById('result-count');
+
+            // Store the full results for pagination
+            currentResults = results;
+            
+            // Reset to first page when new search is performed
+            currentPage = 1;
+            
+            masonryGrid.innerHTML = '';
+
+            if (results.length === 0) {
+                const noResultsDiv = document.createElement('div');
+                noResultsDiv.className = 'no-results';
+                noResultsDiv.style.gridColumn = '1 / -1';
+                noResultsDiv.style.textAlign = 'center';
+                noResultsDiv.style.padding = '40px';
+                noResultsDiv.style.color = 'white';
+                noResultsDiv.style.fontSize = '1.2em';
+                noResultsDiv.innerHTML = 'No results found. Try a different search term.';
+                masonryGrid.appendChild(noResultsDiv);
+                controlsContainer.style.display = 'none';
+                document.getElementById('pagination-container').style.display = 'none';
+                return;
+            }
+
+            // Show controls and update result count
+            controlsContainer.style.display = 'flex';
+            resultCount.textContent = `Found ${results.length} result${results.length !== 1 ? 's' : ''}`;
+
+            // Get only the results for the current page
+            const paginatedResults = getPaginatedResults();
+
+            paginatedResults.forEach((row, index) => {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'vip-card';
+                
+                // Calculate the sum of digits for the cell number
+                const cellNumber = row[0] || ''; // Use the VIP number directly
+                const digitSum = calculateDigitSum(cellNumber);
+                const price = row[5] || '';
+
+                // Create card content
+                cardDiv.innerHTML = `
+                    <div class="vip-number-display">
+                        <div class="vip-number-main">${highlightText(cellNumber, searchTerm)}</div>
+                        <div class="vip-price">${formatPrice(price)}</div>
+                        <div class="vip-sum">Sum: ${digitSum}</div>
+                    </div>
+                    <button class="buy-now-btn" data-vip-number="${cellNumber}" data-price="${price}" data-sum="${digitSum}">
+                        Buy Now
+                    </button>
+                `;
+
+                // Add animation delay
+                cardDiv.style.animationDelay = `${index * 0.1}s`;
+
+                masonryGrid.appendChild(cardDiv);
+            });
+            
+            // Add click event listeners to Buy Now buttons
+            document.querySelectorAll('.buy-now-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const vipNumber = this.getAttribute('data-vip-number');
+                    const price = this.getAttribute('data-price');
+                    const sum = this.getAttribute('data-sum');
+                    openBuyNowModal(vipNumber, price, sum);
+                });
+            });
+            
+            // Update pagination controls
+            updatePaginationControls();
+        }
+
+        // Function to refresh the cards with current page
+        function refreshTable(searchTerm) {
+            const masonryGrid = document.getElementById('masonry-grid');
+            masonryGrid.innerHTML = '';
+            
+            const paginatedResults = getPaginatedResults();
+            
+            paginatedResults.forEach((row, index) => {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'vip-card';
+                
+                // Calculate the sum of digits for the cell number
+                const cellNumber = row[0] || ''; // Use the VIP number directly
+                const digitSum = calculateDigitSum(cellNumber);
+                const price = row[5] || '';
+
+                // Create card content
+                cardDiv.innerHTML = `
+                    <div class="vip-number-display">
+                        <div class="vip-number-main">${highlightText(cellNumber, searchTerm)}</div>
+                        <div class="vip-price">${formatPrice(price)}</div>
+                        <div class="vip-sum">Sum: ${digitSum}</div>
+                    </div>
+                    <button class="buy-now-btn" data-vip-number="${cellNumber}" data-price="${price}" data-sum="${digitSum}">
+                        Buy Now
+                    </button>
+                `;
+
+                // Add animation delay
+                cardDiv.style.animationDelay = `${index * 0.1}s`;
+
+                masonryGrid.appendChild(cardDiv);
+            });
+            
+            // Add click event listeners to Buy Now buttons
+            document.querySelectorAll('.buy-now-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const vipNumber = this.getAttribute('data-vip-number');
+                    const price = this.getAttribute('data-price');
+                    const sum = this.getAttribute('data-sum');
+                    openBuyNowModal(vipNumber, price, sum);
+                });
+            });
+            
+            // Update pagination controls
+            updatePaginationControls();
+        }
+
+        // Event listener for search form
+        document.getElementById('search-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (typeof cellData === 'undefined' || cellData.length === 0) {
+                console.log('Data not loaded yet');
+                return;
+            }
+            const searchTerm = document.getElementById('search-input').value.trim();
+
+            if (searchTerm) {
+                const results = searchCellData(searchTerm);
+                const filteredResults = applyFilters(results);
+                document.getElementById('results-container').style.display = 'block';
+                populateTable(filteredResults, searchTerm);
+            } else {
+                document.getElementById('results-container').style.display = 'none';
+                document.getElementById('calc-result').style.display = 'none';
+                document.getElementById('controls-container').style.display = 'none';
+            }
+        });
+
+        // Also trigger search on input change for real-time results
+        document.getElementById('search-input').addEventListener('input', function () {
+            if (typeof cellData === 'undefined' || cellData.length === 0) {
+                console.log('Data not loaded yet');
+                return;
+            }
+            const searchTerm = this.value.trim();
+
+            if (searchTerm) {
+                const results = searchCellData(searchTerm);
+                const filteredResults = applyFilters(results);
+                document.getElementById('results-container').style.display = 'block';
+                populateTable(filteredResults, searchTerm);
+            } else {
+                // If search term is empty, show all results, but respect other filters.
+                const filteredResults = applyFilters(cellData);
+                document.getElementById('results-container').style.display = 'block';
+                populateTable(filteredResults, '');
+            }
+        });
+
+        // Event listener for Show All button
+        document.getElementById('show-all-btn').addEventListener('click', function () {
+            if (typeof cellData !== 'undefined' && cellData.length > 0) {
+                const filteredResults = applyFilters(cellData);
+                document.getElementById('results-container').style.display = 'block';
+                populateTable(filteredResults, '');
+                document.getElementById('search-input').value = ''; // Clear search input
+            } else {
+                alert('Data is still loading. Please wait a moment and try again.');
+            }
+        });
+
+        // Event listener for Excel export button
+        document.getElementById('export-excel').addEventListener('click', function () {
+            const searchTerm = document.getElementById('search-input').value.trim();
+            if (searchTerm) {
+                const results = searchCellData(searchTerm);
+                const filteredResults = applyFilters(results);
+                if (filteredResults.length > 0) {
+                    exportToExcel(filteredResults);
+                }
+            }
+        });
+
+        // Function to export to Excel (only essential columns)
+        function exportToExcel(data) {
+            // Create a worksheet with only essential columns (VIP Number, Sum of Digits, Price)
+            const ws = XLSX.utils.aoa_to_sheet([
+                ['VIP Number', 'Sum of Digits', 'Price'],
+                ...data.map(row => {
+                    // Create a new row with only essential data
+                    const cellNumber = row[0] || ''; // The actual VIP number
+                    const digitSum = calculateDigitSum(cellNumber);
+                    const price = row[5] || '';
+                    return [
+                        cellNumber, digitSum, price // Only VIP Number, Sum, and Price
+                    ];
+                })
+            ]);
+
+            // Create a workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'VIP Numbers');
+
+            // Generate file and trigger download
+            XLSX.writeFile(wb, 'VIP_Numbers_Export.xlsx');
+        }
+
+        // Function to filter numbers by specific digits
+        function filterByDigits(includeDigits) {
+            if (!includeDigits || includeDigits.length === 0) return [];
+
+            // Create a regex pattern that only allows the specified digits
+            const allowedDigitsStr = includeDigits.join('');
+            const disallowedDigitsStr = '0123456789'.split('').filter(d => !includeDigits.includes(d)).join('');
+            
+            return cellData.filter(row => {
+                // Check the first two columns (Serial ID and Cell Number) for matching the pattern
+                const cellNumber = row[0] ? row[0].toString() : '';
+                const formattedNumber = row[1] ? row[1].toString().replace(/[^0-9]/g, '') : '';
+                
+                // Check if the number contains ONLY the allowed digits
+                const containsOnlyAllowedDigits = 
+                    (cellNumber && !new RegExp(`[${disallowedDigitsStr}]`).test(cellNumber)) ||
+                    (formattedNumber && !new RegExp(`[${disallowedDigitsStr}]`).test(formattedNumber));
+                
+                // Also check if it contains at least one of the allowed digits
+                const containsAllowedDigit = 
+                    (cellNumber && new RegExp(`[${allowedDigitsStr}]`).test(cellNumber)) ||
+                    (formattedNumber && new RegExp(`[${allowedDigitsStr}]`).test(formattedNumber));
+                
+                return containsOnlyAllowedDigits && containsAllowedDigit;
+            });
+        }
+
+        // Auto-apply digit filter when checkboxes change
+        document.querySelectorAll('.digit-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const checkedDigits = Array.from(document.querySelectorAll('.digit-checkbox:checked'))
+                    .map(checkbox => checkbox.value);
+                
+                if (checkedDigits.length > 0) {
+                    const results = filterByDigits(checkedDigits);
+                    const filteredResults = applyFilters(results);
+                    document.getElementById('results-container').style.display = 'block';
+                    populateTable(filteredResults, '');
+                    
+                    // Update the search input to show what we're filtering for
+                    document.getElementById('search-input').value = `Filter: Only digits ${checkedDigits.join(',')}`;
+                } else {
+                    // If no digits selected, show all results
+                    const searchTerm = document.getElementById('search-input').value.trim();
+                    if (searchTerm) {
+                        const results = searchCellData(searchTerm);
+                        const filteredResults = applyFilters(results);
+                        populateTable(filteredResults, searchTerm);
+                    }
+                }
+            });
+        });
+
+        // Note: Status and Category filters removed as requested
+
+
+
+        // Auto-apply filters when changed
+        function applyFiltersAuto() {
+            if (typeof cellData === 'undefined' || cellData.length === 0) {
+                console.log('Data not loaded yet');
+                return;
+            }
+
+            const searchTerm = document.getElementById('search-input').value.trim();
+            let results = [];
+
+            if (searchTerm) {
+                results = searchCellData(searchTerm);
+            } else {
+                results = [...cellData]; // Use all data if no search term
+                document.getElementById('results-container').style.display = 'block';
+            }
+
+            const filteredResults = applyFilters(results);
+            populateTable(filteredResults, searchTerm);
+        }
+
+        // Add event listeners immediately for auto-apply
+        document.getElementById('sumFilter').addEventListener('input', applyFiltersAuto);
+        document.getElementById('priceRangeFilter').addEventListener('change', applyFiltersAuto);
+
+        // Event listeners for pagination buttons
+        document.getElementById('prev-page').addEventListener('click', function() {
+            if (currentPage > 1) {
+                currentPage--;
+                const searchTerm = document.getElementById('search-input').value.trim();
+                refreshTable(searchTerm);
+            }
+        });
+
+        document.getElementById('next-page').addEventListener('click', function() {
+            const totalPages = Math.ceil(currentResults.length / resultsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                const searchTerm = document.getElementById('search-input').value.trim();
+                refreshTable(searchTerm);
+            }
+        });
+
+
+    </script>
+    <script src="script.js"></script>
+    <script src="contact.js"></script>
+     <script src="number.js"></script>
+    <!-- Firebase Authentication -->
+    <script>
+      // Firebase Configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyAgVrQTPsIocnQEUioIEKZgcwMXG1t1tHk",
+        authDomain: "gobal-vip-numbers.firebaseapp.com",
+        projectId: "gobal-vip-numbers",
+        storageBucket: "gobal-vip-numbers.appspot.com",
+        messagingSenderId: "1059192210451",
+        appId: "1:1059192210451:web:21551ac29b84619b0fabe6",
+        measurementId: "G-FMF9QNVQW0"
+      };
+
+      // Initialize Firebase
+      let app, auth, googleProvider;
+
+      // Wait for Firebase to be available
+      async function initializeFirebase() {
+        try {
+          app = window.initializeApp(firebaseConfig);
+          auth = window.getAuth(app);
+          googleProvider = new window.GoogleAuthProvider();
+
+          // Make Firebase auth available globally
+          window.auth = auth;
+          window.googleProvider = googleProvider;
+
+          console.log('Firebase initialized successfully');
+          return true;
+        } catch (error) {
+          console.error('Firebase initialization error:', error);
+          return false;
+        }
+      }
+
+      // Modal functionality
+      function openBuyNowModal(vipNumber, price, sum) {
+        const modal = document.getElementById('buyNowModal');
+        const selectedVipNumber = document.getElementById('selectedVipNumber');
+        const selectedVipPrice = document.getElementById('selectedVipPrice');
+        
+        selectedVipNumber.textContent = vipNumber;
+        selectedVipPrice.textContent = formatPrice(price);
+        
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeBuyNowModal() {
+        const modal = document.getElementById('buyNowModal');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        
+        // Clear form
+        document.getElementById('purchaseForm').reset();
+      }
+
+      function formatPrice(price) {
+        if (!price || price === '') return 'N/A';
+        const numPrice = parseFloat(price);
+        if (isNaN(numPrice)) return price;
+        return '₹' + numPrice.toLocaleString('en-IN');
+      }
+
+      function sendToWhatsApp(customerData, vipNumber, price, sum) {
+        const whatsappNumber = '9168480110'; // WhatsApp number with country code
+        const message = `VIP Number Inquiry
+
+Customer Details:
+Name: ${customerData.name}
+Phone: ${customerData.phone}
+Pincode: ${customerData.pincode}
+Address: ${customerData.address}
+
+VIP Number Details:
+Number: ${vipNumber}
+Price: ${formatPrice(price)}
+Sum of Digits: ${sum}
+
+Inquiry Date: ${new Date().toLocaleString('en-IN')}
+
+Please contact this customer for further assistance.`;
+
+        const encodedMessage = encodeURIComponent(message);
+
+        // Try WhatsApp API URL first (more reliable for pre-filling)
+        const whatsappApiUrl = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
+        const waMeUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+        const whatsappWebUrl = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
+
+        console.log('Trying WhatsApp API URL:', whatsappApiUrl);
+        console.log('Fallback wa.me URL:', waMeUrl);
+        console.log('Fallback WhatsApp Web URL:', whatsappWebUrl);
+
+        // First try WhatsApp API (works well on mobile and desktop)
+        let whatsappWindow = window.open(whatsappApiUrl, '_blank');
+
+        // If API fails, try wa.me
+        if (!whatsappWindow || whatsappWindow.closed || typeof whatsappWindow.closed == 'undefined') {
+          console.log('WhatsApp API failed, trying wa.me...');
+          whatsappWindow = window.open(waMeUrl, '_blank');
+
+          // If wa.me fails, try WhatsApp Web
+          if (!whatsappWindow || whatsappWindow.closed || typeof whatsappWindow.closed == 'undefined') {
+            console.log('wa.me failed, trying WhatsApp Web...');
+            whatsappWindow = window.open(whatsappWebUrl, '_blank');
+
+            // If all fail, show manual copy modal
+            if (!whatsappWindow || whatsappWindow.closed || typeof whatsappWindow.closed == 'undefined') {
+              console.log('All methods failed, showing manual modal...');
+              showManualWhatsAppMessage(message, whatsappNumber);
+            }
+          }
+        }
+
+        // Show success message with instructions
+        alert('WhatsApp opened with your inquiry message pre-filled. If the message doesn\'t appear, please use the manual copy option that will appear.');
+      }
+
+      function showManualWhatsAppMessage(message, phoneNumber) {
+        // Create a modal or alert with the message for manual sending
+        const manualModal = document.createElement('div');
+        manualModal.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0,0,0,0.8);
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        `;
+
+        manualModal.innerHTML = `
+          <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+            <h3 style="color: #333; margin-bottom: 20px;">Send WhatsApp Message</h3>
+            <p style="color: #666; margin-bottom: 15px;">Please copy the message below and send it to WhatsApp number: <strong>${phoneNumber}</strong></p>
+            <textarea id="whatsappMessage" style="width: 100%; height: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: monospace;" readonly>${message}</textarea>
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+              <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+              <button onclick="copyAndOpenWhatsApp()" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Copy & Open WhatsApp</button>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(manualModal);
+
+        // Focus on the textarea for easy copying
+        setTimeout(() => {
+          document.getElementById('whatsappMessage').select();
+        }, 100);
+      }
+
+      function copyAndOpenWhatsApp() {
+        const messageTextarea = document.getElementById('whatsappMessage');
+        messageTextarea.select();
+        document.execCommand('copy');
+
+        // Open WhatsApp
+        window.open(`https://wa.me/9168480110`, '_blank');
+
+        // Close the manual modal
+        messageTextarea.closest('[style*="position: fixed"]').remove();
+
+        alert('Message copied! Please paste it in WhatsApp and send.');
+      }
+
+      // Initialize when DOM is loaded
+      document.addEventListener('DOMContentLoaded', async () => {
+        await initializeFirebase();
+        
+        // Modal event listeners
+        document.querySelector('.close').addEventListener('click', closeBuyNowModal);
+        document.querySelector('.btn-cancel').addEventListener('click', closeBuyNowModal);
+        
+        // Form submission handling
+        document.getElementById('purchaseForm').addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const customerData = {
+            name: document.getElementById('customerName').value.trim(),
+            phone: document.getElementById('customerPhone').value.trim(),
+            pincode: document.getElementById('customerPincode').value.trim(),
+            address: document.getElementById('customerAddress').value.trim()
+          };
+          
+          // Validate form
+          if (!customerData.name || !customerData.phone || !customerData.pincode || !customerData.address) {
+            alert('Please fill in all required fields.');
+            return;
+          }
+          
+          // Get VIP number details
+          const vipNumber = document.getElementById('selectedVipNumber').textContent;
+          const price = document.getElementById('selectedVipPrice').textContent;
+          const sum = document.querySelector('.buy-now-btn[data-vip-number="' + vipNumber + '"]')?.getAttribute('data-sum') || 'N/A';
+          
+          // Send inquiry to WhatsApp
+          sendToWhatsApp(customerData, vipNumber, price, sum);
+          
+          // Show success message
+          alert('Your inquiry has been sent! We will contact you soon via WhatsApp.');
+          
+          // Close modal
+          closeBuyNowModal();
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+          const modal = document.getElementById('buyNowModal');
+          if (event.target === modal) {
+            closeBuyNowModal();
+          }
+        });
+        
+        // Make functions globally available
+        window.openBuyNowModal = openBuyNowModal;
+        window.closeBuyNowModal = closeBuyNowModal;
+        window.formatPrice = formatPrice;
+      });
+    </script>
+    
+    <!-- Login System Script -->
+    <script src="login-script.js"></script>
+    
+    <script>
+        // Function to show all numbers on page load
+        function showAllNumbers() {
+            if (typeof cellData !== 'undefined' && cellData.length > 0) {
+                const filteredResults = applyFilters(cellData);
+                document.getElementById('results-container').style.display = 'block';
+                populateTable(filteredResults, '');
+            } else {
+                // Try again after a short delay
+                setTimeout(showAllNumbers, 1000);
+            }
+        }
+
+        // Integration script for login system
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize login system
+            initializeLoginSystem();
+        });
+        
+        function initializeLoginSystem() {
+            // Show login section by default
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('profile-section').style.display = 'none';
+            document.getElementById('main-content').style.display = 'none';
+        }
+        
+        // Override the login functions to show main content
+        function showMainContent() {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('profile-section').style.display = 'block';
+            document.getElementById('main-content').style.display = 'block';
+        }
+        
+        function hideMainContent() {
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('profile-section').style.display = 'none';
+            document.getElementById('main-content').style.display = 'none';
+        }
+        
+        // Override the original login functions
+        const originalShowProfileScreen = window.showProfileScreen;
+        const originalShowLoginScreen = window.showLoginScreen;
+        
+        if (originalShowProfileScreen) {
+            window.showProfileScreen = function() {
+                originalShowProfileScreen();
+                showMainContent();
+            };
+        }
+        
+        if (originalShowLoginScreen) {
+            window.showLoginScreen = function() {
+                originalShowLoginScreen();
+                hideMainContent();
+            };
+        }
+    </script>
+
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9E93WE7VD2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  // This line sends the page_view event for every page load.
+  gtag('config', 'G-9E93WE7VD2');
+</script>
+
+    <!-- Filter Linking Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sum Filter now auto-applies independently without linking to search type
+            // Price Range filter auto-applies independently without linking to search type
+        });
+    </script>
+
+
+</body>
+
